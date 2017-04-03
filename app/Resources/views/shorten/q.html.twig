@@ -1,0 +1,15 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+        <div id="container">
+            <div id="welcome">
+                <h1>Shortener</h1>
+            </div>
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="alert alert-danger" role="alert">{{ errorText }}</div>
+                  <p><a class="btn btn-primary" href="{{ url("add_link") }}">Create new</a></p>
+                </div>
+            </div>
+        </div>
+{% endblock %}

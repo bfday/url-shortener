@@ -1,0 +1,36 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+  <div class="container" id="container">
+    <div id="welcome">
+      <h1>Shortener</h1>
+    </div>
+    <div class="row">
+      <div class="col-sm-6">
+        <form class="bs-example-form" enctype="multipart/form-data" method="post">
+          <div class="input-group">
+            <span class="input-group-addon">Field for URL to shorten:</span>
+            <input class="form-control" type="text" style="width: 500px" name="urlToShorten" value="{{ urlToShorten }}" placeholder="Example: http://blah.ru/blah">
+
+          </div>
+          <div class="input-group">
+            <span class="input-group-addon">How long to keep link: </span>
+            <select name="ttl" class="form-control">
+              {% for k, o in ttl %}
+                <option value="{{ k }}"{% if k == ttlSelected %} selected{% endif %}>{{ o }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="input-group">
+            <input class="form-control btn btn-danger" type="submit" value="Уменьшить/проверить">
+          </div>
+        </form>
+        {% if message %}
+          <div class="input-group">
+            <div class="alert alert-info" role="alert">{{ message|raw }}</div>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+{% endblock %}
