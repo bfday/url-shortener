@@ -20,4 +20,4 @@ Follow steps (skip if prefixed with "#" sign):
 
 Running tests
 =
-php phpunit.phar --bootstrap tests/AppBundle/Utils/Numbers/Converters/BasisConverterTest.php
+php phpunit.phar
