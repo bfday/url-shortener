@@ -2,6 +2,7 @@
 namespace AppBundle\Controller;
 
 use AppBundle\Entity\Link;
+use AppBundle\Utils\Numbers\Converters\BasisConverter;
 use Doctrine\DBAL\Query\QueryBuilder;
 use Doctrine\ORM\Query;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
@@ -14,6 +15,7 @@ class ShortenController extends Controller
 {
     protected $ttl;
     protected $ttlDefault;
+    protected $basisConverter;
 
     public function __construct()
     {
@@ -26,6 +28,7 @@ class ShortenController extends Controller
         ];
         reset($this->ttl);
         $this->ttlDefault = key($this->ttl);
+        $this->basisConverter = new BasisConverter();
     }
 
     /**
@@ -72,20 +75,23 @@ class ShortenController extends Controller
              * @var QueryBuilder
              */
             $linkRepository = $this->getDoctrine()
-                                    ->getRepository('AppBundle:Link')
+                                   ->getRepository('AppBundle:Link')
             ;
 
             $link = $linkRepository->findOneBy([
                 "url" => $urlToShorten,
             ]);
-            $entityManager = $this->getDoctrine()->getEntityManager();
+            $entityManager = $this->getDoctrine()->getEntityManager()
+            ;
             // if link exists and not old - print it
             if ($link) {
                 if ($link->getDateActiveTo() === null || ($link->getDateActiveTo() !== null && $link->getDateActiveTo() > new \DateTime())) {
                     $shortenedLinkUrl = $this->getShortenedLinkUrl($request, $link);
                     $message = "Shortened version already exists: <br/> <b><a target='_blank' href='//$shortenedLinkUrl'>$shortenedLinkUrl</a></b> <br/> Hits count = " . $link->getCount();
                     if ($ttlSelected !== "forever") {
-                        $message .= "<br> Link will become unavailable after " . $link->getDateActiveTo()->format(\DateTime::ATOM);
+                        $message .= "<br> Link will become unavailable after " . $link->getDateActiveTo()
+                                                                                      ->format(\DateTime::ATOM)
+                        ;
                     }
                 } else {
                     $entityManager->remove($link);
@@ -97,13 +103,17 @@ class ShortenController extends Controller
             if (!$link) {
                 $link = new Link();
                 $link->setUrl($urlToShorten);
-                if ($dateTillLinkExists !== null) $link->setDateActiveTo($dateTillLinkExists);
+                if ($dateTillLinkExists !== null) {
+                    $link->setDateActiveTo($dateTillLinkExists);
+                }
                 $entityManager->persist($link);
                 $entityManager->flush();
                 $shortenedLinkUrl = $this->getShortenedLinkUrl($request, $link);
                 $message = "Shortened version: <br/> <b><a target='_blank' href='//$shortenedLinkUrl'>$shortenedLinkUrl</a></b>";
                 if ($ttlSelected !== "forever") {
-                    $message .= "<br> This link (and it's stats) will be deleted at " . $link->getDateActiveTo()->format(\DateTime::ATOM);
+                    $message .= "<br> This link (and it's stats) will be deleted at " . $link->getDateActiveTo()
+                                                                                             ->format(\DateTime::ATOM)
+                    ;
                 }
             }
         }
@@ -120,17 +130,16 @@ class ShortenController extends Controller
     }
 
     /**
-     * @Route("/q/{id}", name="query_link")
+     * @Route("/q/{hash}", name="query_link")
      * @param Request $request
      *
-     * @param         $id
+     * @param         $hash
      *
      * @return Response
      */
-    public function qAction(Request $request, $id)
+    public function qAction(Request $request, $hash)
     {
-        $linkId = intval($id);
-        if ($linkId <= 0) {
+        if ($this->basisConverter->isConsistFromBasis($hash) === false) {
             $errorText = "Wrong parameter";
         }
 
@@ -145,12 +154,15 @@ class ShortenController extends Controller
             /**
              * @var Link|null
              */
-            $link = $linkRepository->find($linkId);
+            $link = $linkRepository->find($this->basisConverter->revert($hash));
             if ($link) {
                 $link->incCount();
-                $entityManager = $this->getDoctrine()->getEntityManager();
+                $entityManager = $this->getDoctrine()
+                                      ->getEntityManager()
+                ;
                 $entityManager->persist($link);
                 $entityManager->flush();
+
                 return $this->redirect($link->getUrl());
             } else {
                 $errorText = "Link doesn't exists";
@@ -167,6 +179,11 @@ class ShortenController extends Controller
 
     private function getShortenedLinkUrl(Request $request, Link $link)
     {
-        return $request->getHttpHost() . $this->generateUrl("query_link", ["id" => $link->getId()]);
+        return $request->getHttpHost() . $this->generateUrl(
+            "query_link",
+            [
+                "hash" => $this->basisConverter->convert($link->getId()),
+            ]
+        );
     }
 }

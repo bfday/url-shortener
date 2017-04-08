@@ -1,6 +1,8 @@
 <?
 namespace AppBundle\Entity;
 
+use Doctrine\Common\EventArgs;
+use Doctrine\Common\EventManager;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\Index;
 
@@ -44,7 +46,7 @@ class Link
     }
 
     /**
-     * Get id
+     * Returns entity Id
      *
      * @return integer
      */
@@ -54,7 +56,7 @@ class Link
     }
 
     /**
-     * Set url
+     * Sets url param
      *
      * @param string $url
      *
@@ -79,7 +81,7 @@ class Link
     }
 
     /**
-     * Get url
+     * Returns url param
      *
      * @return string
      */
