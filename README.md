@@ -1,6 +1,8 @@
 What is this?
 =
-This is URL shortener which uses self writing algorithm for shorten the link and time spans to determine shortened link lifespan
+This is the URL shortener which uses self-written algorithm for shorten the link and sustain time spans to determine shortened link lifespan
+
+The main algorithm is located in src\AppBundle\Utils\Numbers\Converters\BasisConverter.php
 
 Installation
 =
