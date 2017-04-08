@@ -18,6 +18,6 @@ Follow steps (skip if prefixed with "#" sign):
 - Open link in browser http://localhost:8000/app_dev.php/shorten
 - #bin/console doctrine:generate:entities AppBundle/Entity/Link
 
-Running tests
+How to run tests
 =
 php phpunit.phar
